@@ -25,10 +25,10 @@ flags.DEFINE_float('weight_decay', 5e-4, 'Weight for L2 loss on embedding matrix
 flags.DEFINE_integer('early_stopping', 10, 'Tolerance for early stopping (# of epochs).')
 flags.DEFINE_integer('max_degree', 3, 'Maximum Chebyshev polynomial degree.')
 
-# Load data
+"""加载数据集"""
 adj, features, y_train, y_val, y_test, train_mask, val_mask, test_mask = load_data(FLAGS.dataset)
 
-# Some preprocessing
+"""特征预处理"""
 features = preprocess_features(features)
 if FLAGS.model == 'gcn':
     support = [preprocess_adj(adj)]
@@ -45,7 +45,7 @@ elif FLAGS.model == 'dense':
 else:
     raise ValueError('Invalid argument for model: ' + str(FLAGS.model))
 
-# Define placeholders
+"""定义占位符"""
 placeholders = {
     'support': [tf.sparse_placeholder(tf.float32) for _ in range(num_supports)],
     'features': tf.sparse_placeholder(tf.float32, shape=tf.constant(features[2], dtype=tf.int64)),
@@ -62,7 +62,7 @@ model = model_func(placeholders, input_dim=features[2][1], logging=True)
 sess = tf.Session()
 
 
-# Define model evaluation function
+"""测试集evalutaion"""
 def evaluate(features, support, labels, mask, placeholders):
     t_test = time.time()
     feed_dict_val = construct_feed_dict(features, support, labels, mask, placeholders)
@@ -76,11 +76,11 @@ sess.run(tf.global_variables_initializer())
 cost_val = []
 intial_t = time.time()
 
-# Train model
+"""Train model"""
 for epoch in range(FLAGS.epochs):
 
     t = time.time()
-    # Construct feed dictionary
+    # 构建输入字典
     feed_dict = construct_feed_dict(features, support, y_train, train_mask, placeholders)
     feed_dict.update({placeholders['dropout']: FLAGS.dropout})
 

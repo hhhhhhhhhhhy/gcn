@@ -41,6 +41,8 @@ def load_data(dataset_str):
     :param dataset_str: Dataset name
     :return: All data input files loaded (as well the training/test data).
     """
+    
+    # 分别从相应文件中加载变量
     names = ['x', 'y', 'tx', 'ty', 'allx', 'ally', 'graph']
     objects = []
     for i in range(len(names)):
@@ -49,11 +51,13 @@ def load_data(dataset_str):
                 objects.append(pkl.load(f, encoding='latin1'))
             else:
                 objects.append(pkl.load(f))
-
     x, y, tx, ty, allx, ally, graph = tuple(objects)
+    
+    # 加载测试集索引文件，并对其进行排序
     test_idx_reorder = parse_index_file("data/ind.{}.test.index".format(dataset_str))
     test_idx_range = np.sort(test_idx_reorder)
 
+    # 对于 'citeseer' 数据集，修复孤立节点的问题，将孤立节点添加为零向量。
     if dataset_str == 'citeseer':
         # Fix citeseer dataset (there are some isolated nodes in the graph)
         # Find isolated nodes, add them as zero-vecs into the right position
@@ -65,21 +69,27 @@ def load_data(dataset_str):
         ty_extended[test_idx_range-min(test_idx_range), :] = ty
         ty = ty_extended
 
+    # 合并所有特征向量，并根据测试集索引重新排序。
     features = sp.vstack((allx, tx)).tolil()
     features[test_idx_reorder, :] = features[test_idx_range, :]
+    # 图的邻接列表构建邻接矩阵
     adj = nx.adjacency_matrix(nx.from_dict_of_lists(graph))
 
+    # 合并所有标签，并根据测试集索引重新排序
     labels = np.vstack((ally, ty))
     labels[test_idx_reorder, :] = labels[test_idx_range, :]
 
+    # 定义训练、验证和测试的索引
     idx_test = test_idx_range.tolist()
     idx_train = range(len(y))
     idx_val = range(len(y), len(y)+500)
 
+    # 创建掩码，用于区分训练、验证和测试数据
     train_mask = sample_mask(idx_train, labels.shape[0])
     val_mask = sample_mask(idx_val, labels.shape[0])
     test_mask = sample_mask(idx_test, labels.shape[0])
 
+    # 初始化训练、验证和测试的标签矩阵，并根据掩码填充标签
     y_train = np.zeros(labels.shape)
     y_val = np.zeros(labels.shape)
     y_test = np.zeros(labels.shape)
