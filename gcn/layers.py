@@ -1,4 +1,5 @@
-from gcn.inits import *
+# from gcn.inits import *
+from inits import *
 import tensorflow as tf
 
 flags = tf.app.flags
