@@ -11,7 +11,7 @@ def uniform(shape, scale=0.05, name=None):
 
     生成一个在 [--scale, scale] 范围内均匀分布的随机数初始化器。
 
-    参数:
+    参数: 
     shape (tuple): 变量的形状。
     scale (float): 均匀分布的范围，默认为 0.05。
     name (str): 变量的名称，默认为 None。
