@@ -4,8 +4,8 @@ from __future__ import print_function
 import time
 import tensorflow as tf
 
-from gcn.utils import *
-from gcn.models import GCN, MLP
+from utils import *
+from models import GCN, MLP
 
 # Set random seed
 seed = 123
@@ -74,6 +74,7 @@ def evaluate(features, support, labels, mask, placeholders):
 sess.run(tf.global_variables_initializer())
 
 cost_val = []
+intial_t = time.time()
 
 # Train model
 for epoch in range(FLAGS.epochs):
@@ -100,6 +101,7 @@ for epoch in range(FLAGS.epochs):
         break
 
 print("Optimization Finished!")
+print("Training Time=", "{:.5f}".format(time.time() - intial_t))
 
 # Testing
 test_cost, test_acc, test_duration = evaluate(features, support, y_test, test_mask, placeholders)
